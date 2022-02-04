@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Seminar Web Engineering in Winter semester 2020/21 - Kubernetes-111</title>
+    <link rel="stylesheet" type="text/css" href="main.css"/>
+    <link href='https://fonts.googleapis.com/css?family=Source+Serif+Pro:400,600,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<header>
+    <h2>Seminar Web Engineering in Winter semester 2020/21</h2>
+    <h1>Kubernetes-111</h1>
+    <h2 class="author">Meshu Deb Nath, Diwakar Dangal</h2>
+    <h3 class="affiliation">
+        Professorship Distributed and Self-Organizing Computer System<br/>
+        Technische Universität Chemnitz<br/>
+        Chemnitz, Deutschland
+    </h3>
+</header>
+
+
+<section>
+    <h2>1. Kubernetes</h2>
+    <i>Edited by Meshu Deb Nath, Diwakar Dangal</i>
+    <p>
+        In the last 5 years, Kubernetes has become the most popular orchestration platform.
+        It provides high availability and scalability through diverse self-healing and scaling
+        mechanisms. Therefore, a huge community rise of this open-source project makes it the most
+        popular orchestration platform right now. Kubernetes makes it easy to deploy and automatically
+        manage a microservice-based complex application.
+
+    </p>
+    <p>
+        In this report, we are going to discuss Kubernetes and its architecture.
+        we will demonstrate a microservice deployment in the Kubernetes cluster and discuss the horizontal
+        pod autoscaling (HPA) <a href="#r1">[1]</a>, the most important features of Kubernetes.
+
+    </p>
+
+</section>
+<section>
+    <h2> 2. Container Technology </h2>
+    <i>Edited by Diwakar Dangal</i>
+    <p>
+        Containers are the one which shares the properties of the operating system. They are
+        Loosely coupled, distributed and independent to each other, therefore,
+        which can be deployed and managed dynamically by the smaller teams which result in flexibility
+        and effectiveness in every aspect of the entire process <a href="#r1">[1, </a><a href="#r13"> 13,</a><a
+            href="#r14"> 14]</a>.
+    <p>In a nutshell container
+        technology is treated as one of the best practices for medium and large-scale
+        industries because of its ability to make maximum use of the resources available <a href="#r1">[1]</a>.
+    </p>
+    <h3> 2.1. Container Orchestration </h3>
+
+    <p>
+        Container orchestration is a set of actions undertaken by application owners for selecting, deploying,
+        monitoring and controlling the different configuration of operating resources to guarantee in the quality of
+        services <a href="#r14">[14]</a>. Container technology gives rise to the birth of a new methodology called container orchestration.
+        While handling different applications, continuous monitoring can be harsh. Also, the allocation of containers and solving
+        pods could be a hectic job. So, Automation technology provides self-healing process, distribution of cut-off resources
+        and auto-generating of the services.
+    </p>
+    <p>
+        Container orchestration not only helps in the first step of development of the application, but it also manages the life
+        cycles of containers throughout the process especially in large, dynamic environments <a href="#r25">[25]</a>.
+        Processes that orchestrations generally control and automate, for example, scaling, allocating the resources, load
+        balancing and traffic routing, monitoring the container health, configuring and scheduling of the process,
+        making the interaction between containers secure.
+    </p>
+
+    <h3>2.2. When to use a plain docker, when Kubernetes, when none of them?
+    </h3>
+    <i>Edited by Meshu Deb Nath, Diwakar Dangal</i>
+
+    <p>
+        Docker <a href="#r22">[22]</a> and Kubernetes <a href="#r1">[1]</a> are not alternative technology to the
+        other.
+        Docker is a software that is used for containerized applications <a href="#r22">[22]</a>.
+        Containerization is a technique of running an application so that the application can be
+        isolated from the system. It can create an illusion for the application that it has working
+        on its OS instances. Hence, Docker prepares to run, create and manage containers on a single OS.
+
+    </p>
+    <p>
+        Kubernetes automates the process of scaling, updating, maintaining,
+        and sorting containers. While Docker enables us to have containers in the first place.
+        On the other side, Docker or Kubernetes will be an inadequate choice when the hardware
+        resources are limited <a href="#r1">[1, </a><a href="#r22">22]</a>.
+
+    </p>
+    <h3>2.3 What are alternatives to Kubernetes?</h3>
+    <i>Edited by Diwakar Dangal</i>
+    <p>
+        Kubernetes <a href="#r1">[1], </a> Docker swarm <a href="#r22">[22]</a>, and Mesos <a href="#r23">[23]</a>
+        all of these technologies belong to the class of Dev Ops 3 layers: resource management, scheduling, and
+        service management <a href="#r18">[18]</a>. Based on resource management availability such as memory, CPU,
+        GPU, disk space, etcMesos has a greater functionality <a href="#r18">[18]</a>.
+
+    </p>
+    <p>
+        Based on the schedule layer comparison Kubernetes performs better in all of this resources like placement,
+        replication, scaling, readiness checking, resurrection, rescheduling, rolling deployment, and co-location <a
+            href="#r18">[18]</a>. Based on the service management layer comparison Kubernetes and Mesos are in
+        equivalent labels while here, Kubernetes have partial levels of dependencies and Mesos has less
+        effectiveness in load balancing <a href="#r18">[18]</a>.
+    </p>
+    <p>
+        Apart from the comparison between these technologies application owner, Docker swarm <a href="#r22">[22]</a>
+        is easy to organize and set up, with a flexible API but has limited customization.
+    </p>
+    <p>
+        Mesos are best for systems that have large and complex architecture and are also designed for maximum
+        redundancy. It is a stable platform, however overly complex for small-scale systems that operate between
+        10-20 nodes.
+    </p>
+    <p>
+        So, in a nutshell, it depends on the company structure and working methodology for choosing the orchestration
+        technique for them.
+
+    </p>
+
+</section>
+
+<section>
+    <h2>3. Kubernetes </h2>
+    <i>Edited by Diwakar Dangal</i>
+
+    <p>
+        Containers bundle up the application of user choice in the real-time environment, there could be thousands
+        of containers.
+        It can be a hectic job to monitor them and perform designated solutions accordingly. Now, here Kubernetes
+        comes to the rescue,
+        it provides an automated environment and handles a framework to run distributed systems silently in the
+        background.
+        Kubernetes can detect the failed application and provides deployment patterns accordingly <a href="#r1">[1]</a>.
+        For example,
+        if some container goes down it will start a new container and can easily manage a canary deployment
+        throughout the process <a href="#r1">[1]</a>.
+    </p>
+    <p>
+        What's the specialities of Kubernetes and why user needs to use it.
+    <ul>
+        <li>
+            Containers have their DNS name and IP address. Here in the condition if traffic to the container gets
+            high,
+            it balances the load and distributes
+            the network traffic which makes deployment stable <a href="#r1">[1]</a>. So, service discovery and load
+            balancing can be achieved.
+        </li>
+        <li>
+            Kubernetes provides storage orchestration which automatically allows mounting storage of user choice, for example,
+            local storage, public clouds, and many more <a href="#r1">[1]</a>.
+        </li>
+        <li>
+            Automated rollout and rollbacks are possible because it gives a flexible environment to create new
+            containers, remove existing or modify them in the desired state of the application owner<a
+                href="#r1">[1]</a>.
+        </li>
+        <li>
+            Automatic bin packing can be done by giving instruction to Kubernetes on how much CPU and memory(RAM)
+            could
+            be used according to process and container needs for utilizing the resources<a href="#r1">[1]</a>.
+        </li>
+        <li>
+            Restarting the container which fails, replacing or killing non-functioning containers according to
+            user-defined instruction and cannot participate until they are ready to serve <a href="#r1">[1]</a>.
+            Hence, there is a self-healing in Kubernetes.
+        </li>
+        <li>
+            It can store and manage confidential data i.e password, OAuth token, and SSH keys <a href="#r1">[1]</a>.
+        </li>
+    </ul>
+    <p>
+        In a nutshell, secret and configuration management is possible and because of these many features,
+        Kubernetes becomes the most popular orchestration tool for the enterprise-scale industry in these current
+        circumstances.
+    </p>
+
+    <h3>3.1 Kubernetes Components</h3>
+    <i>Edited by Diwakar Dangal</i>
+
+    <p>
+        This section described the main components of a Kubernetes cluster and their interconnection between
+        them.
+    </p>
+
+    <h4>3.1.1 Pod</h4>
+    <p>
+        The most basic execution and element in Kubernetes is a pod, which consists of multiple containers and
+        deployment instructions for their execution <a href="#r2">[2]</a>. Each pod represents a single instance for
+        the process and necessary execution guidelines to be carried out throughout the process and always belongs
+        to a specific namespace <a href="#r2">[2]</a>. In this sense, it is referred to as a replica, hence during
+        the process of deployment of an application,
+        the desired number of replicas and amount of requested resources need to be specified in the YAML file of
+        the application <a href="#r2">[2]</a>.
+
+    </p>
+    <p>
+        Moreover, each pod is assigned with a unique IP address which allows an application to scale up for the
+        instance. When the application requires more instances instead of adjusting new one can be created in the
+        available pod to share the load of applications <a href="#r2">[2]</a>.
+    </p>
+
+    <h4>3.1.2 Service</h4>
+    <p>
+        It has a permanent IP address in the cluster, it can be attached to every node, if the pod dies in the
+        process it remembers the current state of the pod when the new pod is formed, the operation begins from the
+        previous state where it had died <a href="#r1">[1, </a><a href="#r2"> 2]</a>. Hence, when the pod dies
+        service remains alive.
+    </p>
+
+    <h4>3.1.3 Ingress</h4>
+    <p>
+        It provides load-balancing, SSL-termination and virtual hosting for the Kubernetes cluster <a
+            href="#r1">[1]</a>.
+    </p>
+
+    <h4>3.1.4 Config Map</h4>
+
+    <p>
+        It is an external configuration of the application, it contains configuration data like URLs of a database
+        or some other service that the application owner used. So in Kubernetes users need to connect it to the pod
+        so that pod gets the data that the config map contains <a href="#r24">[24]</a>.
+    </p>
+
+    <h4>3.1.5 Secret</h4>
+
+    <p>
+        It can be used to store secret credentials, for example, base 64 encoded format, so secrets would contain things like credentials <a href="#r24">[24]</a>. Hence, it store's confidential information like passwords and certificates.
+    </p>
+
+    <h4>3.1.6 Volumes</h4>
+
+    <p>
+        A Volume is a directory that can be accessed by a pod for containers. Kubernetes uses its own abstraction of
+        volumes, allowing all containers to share data and remain available until the pod is dismantled <a
+            href="#r1">[1]</a>.
+    </p>
+
+    <h4>3.1.7 Node</h4>
+
+    <p>
+        Node is the place of the machine where Kubernetes is installed either it can be a physical or virtual
+        machine <a href="#r1">[1]</a>. Node is the part of a machine where Kubernetes launches its container inside
+        of pods for the execution of processes.
+    </p>
+
+    <h4>3.1.8 Containers</h4>
+    <p>
+        Containers are self-contained, standardized execution enclosures that are composed of dependencies along
+        with the binaries and libraries required to get similar behaviour wherever the user runs it <a
+            href="#r1">[1]</a>.
+    </p>
+
+    <h2>3.2 Architecture of Kubernetes</h2>
+    <i>Edited by Diwakar Dangal</i>
+
+    <p>
+        This section described the main architecture of Kubernetes.
+    </p>
+
+    <h3>3.2.1 Kubernetes Cluster</h3>
+    <p>
+        Kubernetes <a href="#r1">[1]</a> cluster at least consists of one master or multiple and several worker
+        nodes. In production environments, there could be multiple masters and worker nodes to ensure the high
+        availability of the cluster.
+    </p>
+
+    <h3>3.2.2 Master Node</h3>
+    <p>
+        In master nodes, we have completely different processes running inside, and these four processes that run on
+        every master node that controls the cluster state and the worker nodes.
+    </p>
+
+    <h4>3.2.2.1 Kube-controller Manager</h4>
+    <p>
+        This is responsible for ensuring that the cluster is running in the desired state<a href="#r2">[2]</a>. For
+        instance, 3 pods are running if one pod gets collapsed, now it's Kube-controller manager job is to create
+        new replicas and carry on process execution <a href="#r2">[2,</a><a href="#r24"> 24</a><a href="#r1">,
+        1]</a>.
+    </p>
+
+    <h4>3.2.2.2 Kube-scheduler</h4>
+    <p>
+        It decides how events and jobs will be scheduled across the cluster considering several factors including
+        nodes, resources availability, and the policy set by the application owner <a href="#r2">[2</a><a
+            href="#r4">, 4]</a>.
+    </p>
+
+    <h4>3.2.2.3 Kube-API Server</h4>
+    <p>
+        Kube-API server is like a cluster gateway that gets the initial request of any updates into the cluster or
+        even the queries from the cluster. It makes sure it is an authorized request and if everything is fine then
+        it will forward our request to other processes in order to schedule the pod <a href="#r2">[2]</a>.
+    </p>
+
+    <h3>3.3 System Requirement</h3>
+    <i>Edited by Meshu Deb Nath</i>
+
+    <p>
+        This section described the hardware and software requirements of Kubernetes.
+    </p>
+
+    <h4>3.3.1 Hardware Requirements</h4>
+    <p>
+        Kubernetes cluster can be set up on a Linux based operating system such as Ubuntu, Debian, CentOS, Red Hat
+        Enterprise Linux, Fedora, HypriotOS, Flatcar Container Linux. This operating system should have at least 2GB
+        or more RAM per machine with a minimum of 2 CPU or more. Also, Unique hostname, MAC address, and
+        product_uuid are required for every node. It also requires certain ports for the operation <a
+            href="#r1">[1]</a>.
+
+    </p>
+
+    <h4>3.3.2 Typical Node and Application Sizes</h4>
+    <p>
+        While creating a Kubernetes cluster choosing how many worker nodes and what type of nodes is challenging.
+        The total computational capacity of the cluster (in terms of CPU and memory) is dependent on the sum of all
+        the nodes of the cluster <a href="#r19">[19]</a>. There are several ways to find out the desired target
+        capacity of a cluster. For example, if our application needed a cluster setup with a total capacity of 8 CPU
+        cores and 32 GB of RAM. Therefore, we can design it in two possible ways such as a cluster with few large
+        nodes which is 2 nodes (4 CPU and 16 GB of RAM for each).
+        Another way of design is a cluster with many small nodes which is 4 nodes (2 CPU and 8 GB of RAM for each
+        node) <a href="#r19">[19]</a>.
+
+    </p>
+
+    <p>
+        The best design depends on application requirements. For example, if the application requires 10 GB of
+        memory then the cluster with a few large nodes would be the best choice. Because it can be designed with
+        fewer machines than many smaller nodes hence it is cost-effective. It can easily fit the resource-hungry
+        application into the worker nodes. But it has some issues such as a large number of pods per node thus it
+        makes the system slow. There are some reports of nodes being reported as non-ready <a href="#r20">[20]</a>.
+        Therefore, Kubernetes recommend a maximum number of 110 pods per nodes <a href="#r1">[1]</a>.
+
+    </p>
+    <p>
+        Alternatively, if the application requires high availability with 10-fold replication therefore, designing
+        the cluster with many smaller nodes would be the best design <a href="#r19">[19]</a>. Because it can reduce
+        the blast radius for example, if we have 100 pods in 10 nodes then each node will be responsible for on
+        average 10 pods. Thus, if one of the nodes fails, it barely impacts the total workload. Also, many smaller
+        nodes allow highly replication that means during the nodes failure scenario, there is a possibility of
+        another replica maintaining the app's stability all the time. It has also some drawbacks such as pods
+        limitation, lower resource utilization,
+        more system overhead etc <a href="#r19">[19]</a>. So, achieving a target capacity depends on the specific
+        application requirements.
+    </p>
+
+    <h3>3.4 Deployment Strategy
+    </h3>
+    <i>Edited by Meshu Deb Nath</i>
+
+    <p>
+        One of the biggest challenges in cloud technology is how to deploy applications more instantly and
+        cost-effectively. It is important to choose the right strategy to make a reliable transition during an
+        application update procedure. System availability measured by a given time limit which is a nonfunctional
+        requirement <a href="#r15">[15]</a>. High availability is only achieved when the system is 99.999% available
+        at the time <a href="#r16">[16]</a>. We are going to discuss four types of deployment strategies here.
+    </p>
+    <ul>
+        <li>
+            Rolling Deployment: It is the standard default deployment strategy which gradually updates the pods, one
+            by one and replaces pods with the newer version pods without cluster downtime <a href="#r7">[7]</a>.
+        </li>
+        <li>
+            Recreate Deployment: This deployment killed all the existing pods and replaced them with new instances
+            from the latest updates <a href="#r17">[17]</a>.
+        </li>
+
+        <li>
+            Blue-Green Deployment: In this deployment strategy an old version referred to Green and newer version
+            referred to blue get deployed simultaneously but the users only have access to the Green version <a
+                href="#r17">[17]</a>.
+
+        </li>
+        <li>
+            Canary Deployment: It is more similar to Blue-Green deployment but more controlled and used a
+            progressive delivery phase for the deployment. It is convenient for error and performance monitoring but
+            slow rollout and sometimes needs additional tools for shifting traffic, for example, Istio or Linkerd <a
+                href="#r17">[17]</a>.
+        </li>
+    </ul>
+    <h2>4. Demonstration</h2>
+    <i>Edited by Meshu Deb Nath</i>
+
+    <p>
+        We set up a Kubernetes cluster of 4 nodes, consisting of 1 master node and 4 worker nodes which has 1 core
+        for each machine with 4 GB of Ram.
+        (we ignored the minimum core recommendation due to resource limitation). Linux Debian Kernel version
+        4.19.152-1 (2020-10-18) is the OS on all
+        VMs and Docker 18.09 is running as the container engine with Kubernetes 1.15.2 is running on all nodes. For
+        the demonstration,
+        we use an application developed using microservice patterns. The pod deployment YAML provided to the
+        deployment controller contains
+        the container image of a Backend service, a Frontend Service and a MongoDB. We also define three services
+        for the three pods with one as a load balancer type to make an endpoint for the outside of the cluster.
+    </p>
+    <figure id="figure1">
+        <img src="demo1.png" alt="docker build commands"/>
+        <figcaption>
+            <strong>Figure 1.</strong> Command for building containerize image for backend microservice.
+        </figcaption>
+    </figure>
+
+    <figure id="figure2">
+        <img src="demo2.png" alt="docker push to dockerhub"/>
+        <figcaption>
+            <strong>Figure 2.</strong> Command for pushing docker image to docker hub.
+        </figcaption>
+    </figure>
+    <p>
+        We created our backend microservice using express js, front-end microservice using Vue js and
+        containerized these microservices using docker build <a href="#r21">[21]</a>(see <a href="#figure1">figure 1</a>). Then, we pushed
+        and stored them in the Docker Hub <a href="#r20">[20]</a> (see <a href="#figure2">figure 2</a>).
+    </p>
+
+    <h3>4.1 Components Overview of Our Cluster</h3>
+    <i>Edited by Meshu Deb Nath</i>
+    <figure id="figure3">
+        <img src="demo3.png" alt="overview of our kubernetes cluster."/>
+        <figcaption>
+            <strong>Figure 3.</strong> Overview of Pods and Services deployed in our cluster.
+        </figcaption>
+    </figure>
+
+    <p>
+        According to <a href="#figure3">figure 3</a>, a user can access our Frontend external service via a load balancer IP address.
+        Therefore, the external service of Frontend pods calls the Backend external service which can get the data
+        from the MongoDB through an internal service.
+    </p>
+
+    <h3>4.2 Deployment Templates</h3>
+    <i>Edited by Meshu Deb Nath</i>
+
+
+    <figure id="figure4">
+           <pre>
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: mongodb-deployment
+              labels:
+                app: mongodb
+            spec:
+              replicas: 1
+              selector:
+                matchLabels:
+                  app: mongodb
+              template:
+                metadata:
+                  labels:
+                    app: mongodb
+                spec:
+                  containers:
+                  - name: mongodb
+                    image: mongo
+                    ports:
+                    - containerPort: 27017
+           </pre>
+        <figcaption>
+            <strong>Figure 4.</strong> Deployment yaml template to create pods of MongoDB.
+        </figcaption>
+    </figure>
+
+    <figure id="figure5">
+            <pre>
+                apiVersion: v1
+                kind: Service
+                metadata:
+                  name: mongodb-service
+                spec:
+                  selector:
+                    app: mongodb
+                  ports:
+                    - protocol: TCP
+                      port: 27017
+                      targetPort: 27017
+            </pre>
+        <figcaption>
+            <strong>Figure 5.</strong> Deployment yaml template to create service of MongoDB.
+        </figcaption>
+    </figure>
+
+
+    <figure id="figure6">
+            <pre>
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata:
+                  name: backend-deployment
+                  labels:
+                    app: backend
+                spec:
+                  replicas: 2
+                  selector:
+                    matchLabels:
+                      app: backend
+                  template:
+                    metadata:
+                      labels:
+                        app: backend
+                    spec:
+                      containers:
+                      - name: backend
+                        image: meshudn/node-todo-backend:latest
+                        env:
+                        - name: MONGO_URL
+                          value: "mongodb://mongodb-service:27017/todos"
+                        - name: APP_PORT
+                          value: "80"
+                        ports:
+                        - containerPort: 80
+            </pre>
+        <figcaption>
+            <strong>Figure 6.</strong> Deployment yaml template to create pods of Backend.
+        </figcaption>
+    </figure>
+
+    <figure id="figure7">
+             <pre>
+                apiVersion: v1
+                kind: Service
+                metadata:
+                  name: backend-service
+                spec:
+                  selector:
+                    app: backend
+                  type: LoadBalancer
+                  ports:
+                    - protocol: TCP
+                      port: 80
+                      targetPort: 80
+                      nodePort: 30007                
+             </pre>
+        <figcaption>
+            <strong>Figure 7.</strong> Deployment yaml template to create service of Backend.
+        </figcaption>
+    </figure>
+
+
+    <figure id="figure8">
+            <pre>
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata:
+                  name: frontend
+                  labels:
+                    app: frontend
+                spec:
+                  replicas: 2
+                  selector:
+                    matchLabels:
+                      app: frontend
+                  template:
+                    metadata:
+                      labels:
+                        app: frontend
+                    spec:
+                      containers:
+                      - name: frontend
+                        image: meshudn/node-todo-frontend:latest
+                        env:
+                        - name: BACKEND_URL
+                          value: "http://134.109.233.159:30007/"
+                        ports:
+                        - containerPort: 8080
+            </pre>
+        <figcaption>
+            <strong>Figure 8.</strong> Deployment yaml template to create pods of Frontend.
+        </figcaption>
+    </figure>
+
+    <figure id="figure9">
+             <pre>
+                apiVersion: v1
+                kind: Service
+                metadata:
+                  name: frontend-service
+                spec:
+                  selector:
+                    app: frontend
+                  type: LoadBalancer	
+                  ports:
+                    - protocol: TCP
+                      port: 8080
+                      targetPort: 8080
+                      nodePort: 30036              
+             </pre>
+        <figcaption>
+            <strong>Figure 9.</strong> Deployment yaml template to create service of Frontend.
+        </figcaption>
+    </figure>
+
+    <p>
+        We created a deployment YAML to deploy MongoDB instances and services in the port 27017 (<a href="#figure4">figure 4</a>,
+        <a href="#figure5">5</a>), an
+        instance of backend microservices and load balancer service with 30007 nodePort (<a href="#figure6">figure 6</a>,
+        <a href="#figure7">7</a>), a frontend
+        instance and services with an external load balancer IP address at NodePort 30036 (<a href="#figure8">figure 8</a>,
+        <a href="#figure9">9</a>). Our
+        final endpoint is http://134.109.233.159:30036.
+    </p>
+
+
+    <h3>4.3 Autoscaling</h3>
+    <i>Edited by Meshu Deb Nath</i>
+
+    <p>
+        One of the most important features of Kubernetes is auto-scaling. It monitors applications and services
+        built with container technology without the help of human interaction. There are three auto scalers in the
+        latest version of Kubernetes.
+    </p>
+    <ul>
+        <li>
+            Horizontal Pod Autoscaler (HPA) <a href="#r1">[1]</a> handles pod adjustments more dynamically and
+            powerfully by monitoring resource consumption of the applications.
+        </li>
+        <li>
+            Vertical Pod Autoscaler (VPA)<a href="#r1">[1]</a> instantly changes the YAML specifications, such as
+            pods minimum requirement and maintains the number of working pods. Therefore, it kills the existing pods
+            and thus disrupts the state of the applications and services.
+        </li>
+        <li>
+            Cluster Autoscaler (CA) <a href="#r1">[1]</a> raises the number of nodes only when it is not possible to
+            schedule pods on the existing nodes. Cluster Autoscaler only works on cloud platforms run by the
+            commercial company such as Google Cloud Platform <a href="#r11">[11]</a> and Amazon Web Services <a
+                href="#r1">[10]</a>.
+        </li>
+    </ul>
+
+    <h4>4.3.1 Horizontal Pod Autoscaling (HPA)</h4>
+    <p>
+        In Kubernetes, HPA is a great tool that automatically increases or decreases the number of pods based on the
+        overall computational and processing power of the application’s without affecting the current running pods
+        (see <a href="#figure10">Figure 10</a>).
+        HPA is a controlled loop implemented by the controller manager. In every 15 seconds (called a sync cycle),
+        the Kube controller manager compares the metrics (collected from either the resource metrics API or the
+        custom metrics API) with the resource utilization <a href="#r1">[1]</a>.
+    </p>
+
+    <figure id="figure10">
+        <img src="demo4.png" alt="Architecture of Kubernetes HPA"/>
+        <figcaption>
+            <strong>Figure 10.</strong> The Architecture of Kubernetes HPA <a href="#r12">[12]</a>.
+        </figcaption>
+    </figure>
+    <p>
+        The HPA controller operates according to the algorithm in equation <a href="#equation1">(1)</a>.
+    </p>
+    <figure>
+        <p id="equation1">
+            desiredReplicas = currentReplicas * (currentMetricValue / desiredMetricValue) <a href="#r1">[1]</a> (1)
+        </p>
+    </figure>
+    <p>
+        Where desired replicas is the number of pods after autoscaling on the other side current replica defined as
+        the number of pods which are currently running,
+        current metric value denoted as the latest collected metric value and finally, the target threshold is defined
+        as desiredMetricValue.
+    </p>
+    <figure id="figure11">
+        <img src="demo5.png" alt="Metric Data of Demo-application"/>
+        <figcaption>
+            <strong>Figure 11.</strong> Metric Data of Demo-application.
+        </figcaption>
+    </figure>
+    <p>
+        <a href="#figure11">Figure 11.</a> shows the configuration and metrics of our Demo application.
+        Where "MINPODS" and "MAXPODS" are the requirements for the Kubernetes cluster which refer
+        to the minimum and maximum number of pods. In the figure, the minimum pod’s requirement for
+        the cluster is 1 and the maximum is 10. The Kube controller manager continuously tracks this
+        replica set number and compares it with the above requirements. For the scaling operation,
+        CPU usages are going to be used as a metric. We set a 10% threshold for the CPU usages.
+        Therefore, when the application reaches the 10% threshold,
+        HPA will automatically increase the number of pods according to equation <a href="#equation1">(1)</a>.
+    </p>
+    <p>
+        For example, according to <a href="#figure11">figure 11</a>, if the current metric value is 40% and the desired value is 10%, the
+        number of replicas will be (1 x (0.40 / 0.10)) or 4.
+        Therefore, the Kube controller manager calls the Kube API server to create 3 more pods. If the current
+        metric value declines to 20% CPU usage, then the desired replicas will be (4 x (0.20/0.10)) or 8. Therefore, 4 more pods will create. On the other side, If the current value is instead 5%, HPA will halve the
+        number of replicas that means 4, since (8 x (0.05 / 0.10)) or 0.5 [2]. To normalize the metrics fluctuations, a little delay period is maintained before removing a pod from the cluster which is 5 minutes
+        <a href="#r1">[1]</a>.
+        HPA will stop the scaling if the ratio is adequately close to 1.0 <a href="#r1">[1]</a>.
+    </p>
+    <p>
+        Furthermore, HPA can follow several metrics at a time, each of the metrics has its own threshold value.
+        HPA will operate its scaling procedure when any of these metrics crosses its threshold mark <a
+            href="#r2">[2]</a>.
+    </p>
+</section>
+
+<section>
+    <h2>5. Conclusion and Research Problems</h2>
+    <i>Edited by Meshu Deb Nath and Diwakar Dangal</i>
+
+    <p>
+        In this report, we have provided an overview of Kubernetes, when to use it and when not and its powerful
+        feature HPA. We demonstrated a microservice application to showcase the use of Kubernetes. Unlike Kubernetes built-in
+        monitoring system which only utilizes the CPU, further research can be made to take the metrics from the application
+        perspective. Also, we think more deployment flexibility can be made in the future.
+    </p>
+</section>
+
+<section class="references">
+    <h2>6. Bibliography</h2>
+    <p class="reference" id="r1">[1] Kubernetes. [Online], Available: <a href="https://kubernetes.io/docs/">https://kubernetes.io/docs/</a>
+        (Accessed in 15.12.2020)</p>
+
+    <p class="reference" id="r2">[2] T.-T. Nguyen, Y.-J. Yeom, T. Kim, D.-H. Park, and S. Kim, “Horizontal Pod Autoscaling in Kubernetes
+        for Elastic Container Orchestration”, Sensors, vol. 20, no. 16, p. 4621, 2020.
+        [Online], Available: <a href="https://www.mdpi.com/1424-8220/20/16/4621/htm">https://www.mdpi.com/1424-8220/20/16/4621</a>.
+        (Accessed in 15.12.2020)
+    </p>
+
+    <p class="reference" id="r3">[3] T. Menouer, “KCSS: Kubernetes container scheduling strategy”, The Journal of Supercomputing.
+        The Journal of Supercomputing, 2020.
+        [Online], Available: <a href="https://link.springer.com/article/10.1007/s11227-020-03427-3">https://link.springer.com/article/10.1007/s11227-020-03427-3</a>.
+        (Accessed in 11.12.2020)
+    </p>
+
+    <p class="reference" id="r4">[4] L. Abdollahi Vayghan, M. A. Saied, M. Toeroe, and F. Khendek,
+        “Deploying Microservice Based Applications with Kubernetes: Experiments and Lessons Learned”, 2018.
+        [Online], Available:<a href ="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8457916">https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8457916</a>.
+        (Accessed in 11.12.2020)
+    </p>
+
+    <p class="reference" id="r5">[5] Q. Wu, J. Yu, L. Lu, S. Qian, and G. Xue,
+        “Dynamically Adjusting Scale of a Kubernetes Cluster under QoS Guarantee”, 2019.
+        [Online], Available:<a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8975761">https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8975761</a>.
+        (Accessed in 10.12.2020)
+    </p>
+
+    <p class="reference" id="r6">[6] N. Dragoni, I. Lanese, S. T. Larsen, M. Mazzara, R. Mustafin, and L. Safina,
+        “Microservices: How To Make Your Application Scale”, in MultiMedia Modeling, MultiMedia Modeling, 2018, pp. 95–104.
+        [Online], Available: <a href="https://link.springer.com/chapter/10.1007/978-3-319-74313-4_8">https://link.springer.com/chapter/10.1007/978-3-319-74313-4_8</a>.
+        (Accessed in 11.01.2021)
+    </p>
+
+    <p class="reference" id="r7">[7] Lukša, Marko. “Kubernetes in Action.” 2018, doi:10.3139/9783446456020.
+        [Online], Available:<a href="https://pdfs.semanticscholar.org/75f2/d163fa0d73fa6a74c263608a169be8405643.pdf">https://pdfs.semanticscholar.org/75f2/d163fa0d73fa6a74c263608a169be8405643.pdf</a>.
+        (Accessed in 11.01.2021)
+    </p>
+
+    <p class="reference" id="r8">[8] Vayghan, Leila Abdollahi et al.
+        “Kubernetes as an Availability Manager for Microservice Applications.” ArXiv abs/1901.04946 (2019): n. pag.
+        [Online], Available: <a href="https://arxiv.org/ftp/arxiv/papers/1901/1901.04946.pdf">https://arxiv.org/ftp/arxiv/papers/1901/1901.04946.pdf</a>
+        (Accessed in 13.01.2021)
+    </p>
+
+    <p class="reference" id="r9">[9] L. Abdollahi Vayghan, M. A. Saied, M. Toeroe and F. Khendek,
+        "Deploying Microservice Based Applications with Kubernetes: Experiments and Lessons Learned,
+        " 2018 IEEE 11th International Conference on Cloud Computing (CLOUD),
+        San Francisco, CA, 2018, pp. 970-973, doi: 10.1109/CLOUD.2018.00148.
+        [Online], Available: <a href="https://ieeexplore.ieee.org/abstract/document/8457916">https://ieeexplore.ieee.org/abstract/document/8457916</a> (Accessed in 20.01.2021)</p>
+
+    <p class="reference" id="r10">[10] Amazon Web Services. [Online], Available: <a href="https://aws.amazon.com">https://aws.amazon.com</a>.
+        (Accessed on 16 Jan 2021).</p>
+
+
+    <p class="reference" id="r11">[11] Google Cloud Platform.
+        [Online], Available: <a href="https://cloud.google.com">https://cloud.google.com</a>.  (Accessed on 16 Jan 2021).
+    </p>
+
+
+    <p class="reference" id="r12">[12] D. Balla, C. Simon, and M. Maliosz, “Adaptive scaling of Kubernetes pods”, 2020.
+        [Online], Available:
+        <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9110428">https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9110428</a>.
+
+        (Accessed on 16 Jan 2021).
+    </p>
+
+
+    <p class="reference" id="r13">[13] C. Pahl, "Containerization and the PaaS Cloud,
+        " in IEEE Cloud Computing, vol. 2, no. 3, pp. 24-31, May-June 2015, doi: 10.1109/MCC.2015.51.
+        [Online], Available:
+        <a href ="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7158965">https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7158965</a>.
+        (Accessed on 16 Jan 2021)
+    </p>
+
+
+    <p class="reference" id="r14">[14] B. D. Martino, G. Cretella, A. Esposito,
+        (2015) Advances in applications portability and services interoperability among multiple clouds,
+        IEEE Cloud Computing 2 (2) (2015) 22-28.
+        [Online], Available:
+        <a href ="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7116435">https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7116435</a>.
+        (Accessed on 17 Jan 2021)
+    </p>
+
+
+    <p class="reference" id="r15">[15] M.  Toeroe  and  F.  Tam,  Service  Availability:
+        Principles  and  Practice. John Wiley & Sons, 2012.
+        [Online], Available:
+        <a href="https://books.google.de/books?hl=de&lr=&id=Ql1oHlKkHOsC&oi=fnd&pg=PT13&dq=M.+Toeroe+and+F.+Tam,+Service+Availability:+Principles+and+Practice.+John+Wiley+%26+Sons,+2012&ots=Hiw1JHhpTg&sig=6-KNUlcXz_IjKAUOGS5DUM7ymu4#v=onepage&q=M.%20Toeroe%20and%20F.%20Tam%2C%20Service%20Availability%3A%20Principles%20and%20Practice.%20John%20Wiley%20%26%20Sons%2C%202012&f=false">
+            https://books.google.de/books
+        </a>.
+        (Accessed in 13.01.2021)
+    </p>
+
+
+    <p class="reference" id="r16">[16] M. Nabi, M. Toeroe, and F. Khendek,
+        “Availability in the cloud: State of the art,” J. Netw. Comput. Appl., vol. 60, pp. 54–67, Jan. 2016.
+        [Online], Available:
+        <a href="https://www.sciencedirect.com/science/article/abs/pii/S1084804515002957">https://www.sciencedirect.com/science/article/abs/pii/S1084804515002957</a>.
+        (Accessed in 12.01.2021)
+    </p>
+
+
+    <p class="reference" id="r17">[17] Kubernetes Deployment Strategy. [online],
+        Available: <a href="https://www.weave.works/blog/kubernetes-deployment-strategies">
+            https://www.weave.works/blog/kubernetes-deployment-strategies</a>   (Accessed in 15.01.2021).
+    </p>
+
+    <p class="reference" id="r18">[18] I. M. A. Jawarneh et al., "Container Orchestration Engines:
+        A Thorough Functional and Performance Comparison," ICC 2019 - 2019 IEEE International Conference on Communications (ICC),
+        Shanghai, China, 2019, pp. 1-6, doi: 10.1109/ICC.2019.8762053.
+        [Online], Available:
+        <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8762053">https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8762053</a>.
+
+        (Accessed in 15.01.2021)
+    </p>
+
+
+    <p class="reference" id="r19">[19] Daniel Weibel, “Architecting Kubernetes clusters — choosing a worker node size”.
+        [Online], Available:<a href="https://learnk8s.io/kubernetes-node-size ">
+            https://learnk8s.io/kubernetes-node-size (Accessed in 18.01.2021)</a>.  (Accessed in 18.01.2021)
+    </p>
+    <p class="reference" id="r20">[20] Ready/NotReady with PLEG issues.
+        Github [Online], Available: <a href="https://github.com/kubernetes/kubernetes/issues/45419 ">
+            https://github.com/kubernetes/kubernetes/issues/45419 </a>.  (Accessed in 18.01.2021) </p>
+
+
+    <p class="reference" id="r21">[21] Docker Hub.
+        [Online], Available: <a href="https://hub.docker.com/">https://hub.docker.com/</a>.  (Accessed in 18.01.2021)</p>
+
+    <p class="reference" id="r22">[22] Docker.
+        [Online], Available:<a href="https://www.docker.com/ ">https://www.docker.com/ </a>.
+        (Accessed in 18.01.2021) </p>
+
+    <p class="reference" id="r23">[23] Mesos.
+        [Online], Available:<a href="http://mesos.apache.org/">http://mesos.apache.org/</a>.  (Accessed in 18.01.2021) </p>
+
+    <p class="reference" id="r24">[24] Container Journal.
+        [Online], Available:<a href="https://containerjournal.com/ ">https://containerjournal.com/ </a>. (Accessed in 18.01.2021)   </p>
+
+    <p class="reference" id="r25">[25] Casalicchio,
+        Emiliano. "Autonomic Orchestration of Containers: Problem Definition and Research Challenges." VALUETOOLS. 2016.
+
+        [Online], Available:<a href="https://www.researchgate.net/profile/Emiliano_Casalicchio/publication/316703820_Autonomic_Orchestration_of_Containers_Problem_Definition_and_Research_Challenges/links/59c1113aaca272295a097a58/Autonomic-Orchestration-of-Containers-Problem-Definition-and-Research-Challenges.pdf">
+            https://www.researchgate.net/profile/Emiliano_Casalicchio/publication
+        </a>. (Accessed in 09.01.2021)
+    </p>
+</section>
+
+</body>
+</html>
